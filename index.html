@@ -154,6 +154,23 @@
           alert(message);
         });
       };
+
+        // forcus to gameview when visible
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") {
+                // The page is running in the background
+
+                console.log("Background");
+            }
+            else {
+                // The page is running in the foreground
+
+                window.focus();
+                console.log("foreground");
+
+            }
+        });
+
         document.body.appendChild(script);
 
         // send analytics event
@@ -174,6 +191,12 @@
                 default:
             }
         }
-    </script>
+
+        //  config sound function for third party API
+        function enableSound(boolean) {
+            var stringVar = boolean.toString();
+            myGameInstance.SendMessage('ShowAds', 'EnableSound', stringVar);
+        } 
+    </script>    
 </body>
 </html>
