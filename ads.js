@@ -1,11 +1,26 @@
-const gameInput = { gameName: 'DrawFly', publisherName: 'Weegoon'/*, surface: 'test'*/};
+var gameInput = { gameName: 'DrawFly', publisherName: 'Weegoon' };
 
+var queryParams = location.search.substring(1)?.split("&")
+var isTestModeOn = queryParams.find((a) => {return a.startsWith('mode')})?.split("=")[1].toLowerCase() === 'test' ? true: false;
+var gpID = queryParams.find((a) => {return a.startsWith('gpid')})?.split("=")[1]
+
+
+if(isTestModeOn){
+    gameInput['surface'] = 'test';
+}
+
+function progressBar(percentage){
+    console.log("Loading Bar :", percentage)
+}
+
+function sendCustomAnalyticsEvent(eventType, extras) {
+    console.log("AnalyticsEvent", eventType, extras);
+}
+//loading scripts
 $.getScript(
 
-   
-    "https://g.glance-cdn.com/public/content/games/xiaomi/gamesAd.js",
-    
-    "gpid.js"
+
+    "https://g.glance-cdn.com/public/content/games/xiaomi/gamesAd.js"
 
 )
     .done(function (script, textStatus) {
@@ -17,18 +32,20 @@ $.getScript(
     });
 
 
-var LPBannerInstance, LBBannerInstance, StickyBannerInstance, replayInstance, GlanceGamingAdInstance, rewardInstance ,_triggerReason;
-var interstitialInstance;
+var LPBannerInstance, LBBannerInstance, StickyBannerInstance, replayInstance, GlanceGamingAdInstance, rewardInstance, _triggerReason;
 var is_replay_noFill = false
 var is_rewarded_noFill = false
 var isRewardGranted = false
 var isRewardedAdClosedByUser = false
 
-const LPMercObj = {
-    adUnitName: "Weegoon_DrawFly_Gameload_Bottom",
-    pageName: 'Weegoon_DrawFly',               //Game Name
-    categoryName: 'Weegoon',           //Publisher Name
-    placementName: 'gameload',
+var pageName = `${gameInput.publisherName}_${gameInput.gameName}`
+var categoryName = isTestModeOn? 'google' : `${gameInput.publisherName}`
+// Objects for different ad format.
+var LPMercObj = {
+    adUnitName: `${gameInput.publisherName}_${gameInput.gameName}_Gameload_Bottom`,
+    pageName,               //Game Name
+    categoryName,         //Publisher Name
+    placementName: isTestModeOn? 'Test_Banner' : 'Gameload',
     containerID: "div-gpt-ad-2",            //Div Id for banner
     height: 250,
     width: 300,
@@ -36,11 +53,11 @@ const LPMercObj = {
     yc: '3.0',
     gpid: gpID,
 }
-const StickyObj = {
-    adUnitName: "Weegoon_DrawFly_Ingame_Bottom",
-    pageName: 'Weegoon_DrawFly',               //Game Name
-    categoryName: 'Weegoon',           //Publisher Name
-    placementName: 'ingame',
+var StickyObj = {
+    adUnitName: `${gameInput.publisherName}_${gameInput.gameName}_Ingame_Bottom`,
+    pageName,               //Game Name
+    categoryName,         //Publisher Name
+    placementName: isTestModeOn? 'Test_Banner' : 'Ingame',
     containerID: "banner-ad",            //Div Id for banner
     height: 50,
     width: 320,
@@ -49,11 +66,11 @@ const StickyObj = {
     gpid: gpID,
 }
 
-const LBBannerObj = {
-    adUnitName: "Weegoon_DrawFly_Leaderboard_Top",
-    pageName: 'Weegoon_DrawFly',               //Game Name
-    categoryName: 'Weegoon',           //Publisher Name
-    placementName: 'leaderboard',
+var LBBannerObj = {
+    adUnitName: `${gameInput.publisherName}_${gameInput.gameName}_Leaderboard_Top`,
+    pageName,               //Game Name
+    categoryName,         //Publisher Name
+    placementName: isTestModeOn? 'Test_Banner' : 'Leaderboard',
     containerID: "div-gpt-ad-1",            //Div Id for banner
     height: 250,
     width: 300,
@@ -71,11 +88,11 @@ function failCb(reason) { }
 
 
 
-const replayObj = {
-    adUnitName: "Weegoon_DrawFly_FsReplay_Replay",
-    placementName: "FsReplay",
-    pageName: 'Weegoon_DrawFly',
-    categoryName: 'Weegoon',
+var replayObj = {
+    adUnitName: `${gameInput.publisherName}_${gameInput.gameName}_FsReplay_Replay`,
+    placementName: isTestModeOn? "Test_Replay" : "FsReplay",
+    pageName,               //Game Name
+    categoryName,         //Publisher Name
     containerID: '',
     height: '',
     width: '',
@@ -83,11 +100,11 @@ const replayObj = {
     yc: '',
     gpid: gpID,
 }
-const rewardObj = {
-    adUnitName: "Weegoon_DrawFly_FsRewarded_Reward",
-    placementName: "FsRewarded",
-    pageName: 'Weegoon_DrawFly',
-    categoryName: 'Weegoon',
+var rewardObj = {
+    adUnitName: `${gameInput.publisherName}_${gameInput.gameName}_FsRewarded_Reward`,
+    placementName: isTestModeOn? "Test_Rewarded": "FsRewarded",
+    pageName,               //Game Name
+    categoryName,         //Publisher Name
     containerID: '',
     height: '',
     width: '',
@@ -96,14 +113,14 @@ const rewardObj = {
     gpid: gpID,
 }
 
-
+//banner ads callbacks 
 function bannerCallbacks(obj) {
-    
-   
+
+
     obj.adInstance?.registerCallback('onAdLoadSucceed', (data) => {
         console.log('onAdLoadSucceeded CALLBACK', data);
 
-        if (obj.adUnitName === LBBannerObj.adUnitName ) {
+        if (obj.adUnitName === LBBannerObj.adUnitName) {
             $("#div-gpt-ad-1").css("display", "flex")
             $(".gameOverDiv").css("margin-top", "0px");
         }
@@ -113,7 +130,7 @@ function bannerCallbacks(obj) {
         console.log('onAdLoadFailed  CALLBACK', data);
 
 
-        if (obj.adUnitName === LBBannerObj.adUnitName ) {
+        if (obj.adUnitName === LBBannerObj.adUnitName) {
             $("#div-gpt-ad-1").css("display", "none")
             $(".gameOverDiv").css("margin-top", "100px");
 
@@ -124,20 +141,18 @@ function bannerCallbacks(obj) {
         console.log('onAdDisplayed  CALLBACK', data);
     });
 
-   
+
 }
-
-
-
-
-
-
+// rewarded ad callbacks
 function rewardedCallbacks(obj) {
 
 
 
     obj.adInstance?.registerCallback('onAdLoadSucceed', (data) => {
         console.log('onAdLoadSucceeded Rewarded CALLBACK', data);
+        if (obj.adUnitName === replayObj.adUnitName) {
+            is_replay_noFill = false
+        }
         if (obj.adUnitName === rewardObj.adUnitName) {
             is_rewarded_noFill = false
         }
@@ -147,6 +162,9 @@ function rewardedCallbacks(obj) {
 
     obj.adInstance?.registerCallback('onAdLoadFailed', (data) => {
         console.log('onAdLoadFailed Rewarded CALLBACK', data);
+        if (obj.adUnitName === replayObj.adUnitName) {
+            is_replay_noFill = true
+        }
         if (obj.adUnitName === rewardObj.adUnitName) {
             is_rewarded_noFill = true
         }
@@ -190,113 +208,37 @@ function rewardedCallbacks(obj) {
     });
 
 }
-
-function replayCallbacks(obj) {
-
-
-
-    obj.adInstance?.registerCallback('onAdLoadSucceed', (data) => {
-        console.log('onAdLoadSucceeded replay CALLBACK', data);
-        if (obj.adUnitName === replayObj.adUnitName) {
-            is_replay_noFill = false
-        }
-    });
-
-    obj.adInstance?.registerCallback('onAdLoadFailed', (data) => {
-        console.log('onAdLoadFailed replay CALLBACK', data);
-        if (obj.adUnitName === replayObj.adUnitName) {
-            is_replay_noFill = true
-        }
-    });
-
-    obj.adInstance?.registerCallback('onAdDisplayed', (data) => {
-        console.log('onAdDisplayed replay CALLBACK', data);
-        myGameInstance.SendMessage('ShowAds', 'MuteSoundAdsOpen');
-
-    });
-
-
-
-    obj.adInstance?.registerCallback('onAdClosed', (data) => {
-        console.log('onAdClosed replay CALLBACK', data);
-
-        runOnAdClosed();
-
-        myGameInstance.SendMessage('ShowAds', 'PlaySoundAdsClose');
-
-    });
-
-    obj.adInstance?.registerCallback('onAdClicked', (data) => {
-        console.log('onAdClicked replay CALLBACK', data);
-    });
-
-    //obj.adInstance?.registerCallback('onRewardsUnlocked', (data) => {
-    //    console.log('onRewardsUnlocked replay CALLBACK', data);
-
-    //    if (obj.adUnitName === rewardObj.adUnitName) {
-    //        isRewardGranted = true
-    //    }
-
-    //});
-
-}
-
+// function to be called after ad closes
 function runOnAdClosed() {
-    window.focus();
-
     if (_triggerReason === 'replay') {
 
-        myGameInstance.SendMessage('ShowAds', 'OnInterstitialAdsClose');
+        // call game function for replay
         _triggerReason = ''
-        replayInstance = window.GlanceGamingAdInterface.loadRewardedAd(replayObj, replayCallbacks);
+        showGame();
+
+        replayInstance = window.GlanceGamingAdInterface.loadRewardedAd(replayObj, rewardedCallbacks);
 
     } else if (_triggerReason === 'reward') {
+
         // If user close ad before reward
         if (!isRewardGranted && isRewardedAdClosedByUser) {
-            // call function for not earning reward (failure case)
+            // call game function for not earning reward (failure case)
 
         } else {
 
-            // call function for earned reward  (success case)
+            // call game function for earned reward  (success case)
             myGameInstance.SendMessage('ShowAds', 'OnRewardAdsClosed');
-
         }
-
         _triggerReason = ''
         rewardInstance = window.GlanceGamingAdInterface.loadRewardedAd(rewardObj, rewardedCallbacks);
 
     }
-    //else if (_triggerReason === 'interstitial') {
-    //    myGameInstance.SendMessage('ShowAds', 'OnInterstitialAdsClose');
-    //    _triggerReason = ''
-    //    replayInstance = window.GlanceGamingAdInterface.loadRewardedAd(replayObj, rewardedCallbacks);
-    //}
+
 
 }
 
-
+// function called on replay button (leaderboard) clicked
 function replayEvent() {
-    _triggerReason = 'replay'
-    console.log("replay 0");
-    if (!is_replay_noFill) {
-        console.log("replay 1");
-        window.GlanceGamingAdInterface.showRewarededAd(replayInstance);
-    } else {
-        runOnAdClosed();
-    }
-
-    // LBBannerInstance.destroyAd();
-
-    //$("#div-gpt-ad-1").html("");
-
-
-}
-
-function loadInterstitial() {
-
-}
-
-function interstitialEvent(){
     _triggerReason = 'replay'
     if (!is_replay_noFill) {
         window.GlanceGamingAdInterface.showRewarededAd(replayInstance);
@@ -304,6 +246,7 @@ function interstitialEvent(){
     } else {
         runOnAdClosed();
     }
+
 }
 
 function rewardEvent() {
@@ -314,6 +257,7 @@ function rewardEvent() {
     } else {
         runOnAdClosed();
     }
+
 }
 
 
@@ -330,4 +274,3 @@ function showGame() {
         $("#div-gpt-ad-1").html("");
     }
 }
-
