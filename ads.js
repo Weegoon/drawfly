@@ -300,6 +300,7 @@ function interstitialEvent(){
     _triggerReason = 'replay'
     if (!is_replay_noFill) {
         window.GlanceGamingAdInterface.showRewarededAd(replayInstance);
+        myGameInstance.SendMessage('ShowAds', 'MuteSoundAdsOpen');
     } else {
         runOnAdClosed();
     }
@@ -309,6 +310,7 @@ function rewardEvent() {
     _triggerReason = 'reward'
     if (!is_rewarded_noFill) {
         window.GlanceGamingAdInterface.showRewarededAd(rewardInstance);
+        myGameInstance.SendMessage('ShowAds', 'MuteSoundAdsOpen');
     } else {
         runOnAdClosed();
     }
